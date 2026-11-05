@@ -1,6 +1,6 @@
 # 96Astro API client for Swift
 
-Early release: generated from the same catalogue as our other SDKs, but not yet compiled in our tests.
+Compiled and run in our tests on the oldest version named below: `tools/sdk/thin_conformance/run.py` checks its requests, retries and errors, and makes one real call to the API.
 
 ## Install
 

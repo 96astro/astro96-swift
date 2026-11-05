@@ -43,7 +43,12 @@ public final class Astro96Client: @unchecked Sendable {
                 req.setValue("application/json", forHTTPHeaderField: "Content-Type")
                 req.setValue(key, forHTTPHeaderField: "Idempotency-Key")
             }
-            let (data, res) = try await URLSession.shared.data(for: req)
+            let request = req
+            let (data, res): (Data, URLResponse) = try await withCheckedThrowingContinuation { done in
+                URLSession.shared.dataTask(with: request) { data, res, error in
+                    if let res, error == nil { done.resume(returning: (data ?? Data(), res)) } else { done.resume(throwing: error ?? URLError(.badServerResponse)) }
+                }.resume()
+            }
             let status = (res as? HTTPURLResponse)?.statusCode ?? 0
             let body = String(decoding: data, as: UTF8.self)
             if status < 400 { return body }
