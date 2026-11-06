@@ -1139,6 +1139,12 @@ public final class Astro96Client: @unchecked Sendable {
     public func numerologyMatch(_ json: String) async throws -> String { try await call("numerology", "numerology-match", json) }
     /// Daily Numerology Prediction.
     public func numerologyDaily(_ json: String) async throws -> String { try await call("numerology", "numerology-daily", json) }
+    /// Vastu Entrance Pada.
+    public func vastuEntrancePada(_ json: String) async throws -> String { try await call("vastu", "vastu-entrance-pada", json) }
+    /// Vastu 81-Pada Grid.
+    public func vastuPadaGrid(_ json: String) async throws -> String { try await call("vastu", "vastu-pada-grid", json) }
+    /// Panch Pakshi Birth Bird.
+    public func panchPakshiBirth(_ json: String) async throws -> String { try await call("remedies", "panch-pakshi-birth", json) }
     /// Chinese Zodiac and Four Pillars.
     public func chineseChart(_ json: String) async throws -> String { try await call("chinese", "chinese-chart", json) }
     /// Chinese Year Forecast.
@@ -1193,6 +1199,10 @@ public final class Astro96Client: @unchecked Sendable {
     public func monthYogas(_ json: String) async throws -> String { try await call("panchang", "month-yogas", json) }
     /// One Match Score.
     public func matchScore(_ json: String) async throws -> String { try await call("matching", "match-score", json) }
+    /// Palm: Lines Traced.
+    public func palmLinesImage(_ json: String) async throws -> String { try await call("palmistry", "palm-lines-image", json) }
+    /// Face: Outline Traced.
+    public func faceOutlineImage(_ json: String) async throws -> String { try await call("face-reading", "face-outline-image", json) }
     /// Whole Palm Reading.
     public func palmReading(_ json: String) async throws -> String { try await call("palmistry", "palm-reading", json) }
     /// Palm: Hand Type.
