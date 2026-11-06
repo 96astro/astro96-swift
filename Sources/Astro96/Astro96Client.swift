@@ -1143,6 +1143,8 @@ public final class Astro96Client: @unchecked Sendable {
     public func vastuEntrancePada(_ json: String) async throws -> String { try await call("vastu", "vastu-entrance-pada", json) }
     /// Vastu 81-Pada Grid.
     public func vastuPadaGrid(_ json: String) async throws -> String { try await call("vastu", "vastu-pada-grid", json) }
+    /// Complete Kundli Report.
+    public func reportCompleteKundli(_ json: String) async throws -> String { try await call("reports", "report-complete-kundli", json) }
     /// Panch Pakshi Birth Bird.
     public func panchPakshiBirth(_ json: String) async throws -> String { try await call("remedies", "panch-pakshi-birth", json) }
     /// Chinese Zodiac and Four Pillars.
@@ -1151,6 +1153,8 @@ public final class Astro96Client: @unchecked Sendable {
     public func chineseYearForecast(_ json: String) async throws -> String { try await call("chinese", "chinese-year-forecast", json) }
     /// Human Design Summary.
     public func humanDesign(_ json: String) async throws -> String { try await call("human-design", "human-design", json) }
+    /// Human Design Interpretation.
+    public func humanDesignInterpretation(_ json: String) async throws -> String { try await call("human-design", "human-design-interpretation", json) }
     /// Human Design Activations.
     public func humanDesignActivations(_ json: String) async throws -> String { try await call("human-design", "human-design-activations", json) }
     /// Human Design Centers and Channels.
