@@ -1365,6 +1365,8 @@ public final class Astro96Client: @unchecked Sendable {
     public func reportAttraction(_ json: String) async throws -> String { try await call("reports", "report-attraction", json) }
     /// Karmic Partnership.
     public func reportKarmicPartnership(_ json: String) async throws -> String { try await call("reports", "report-karmic-partnership", json) }
+    /// All-Signs Compatibility Guide.
+    public func reportAllSignsCompatibility(_ json: String) async throws -> String { try await call("reports", "report-all-signs-compatibility", json) }
     /// Chart Blueprint.
     public func reportChartBlueprint(_ json: String) async throws -> String { try await call("reports", "report-chart-blueprint", json) }
 }
