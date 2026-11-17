@@ -71,7 +71,7 @@ public final class Astro96Client: @unchecked Sendable {
     public func specialLagnaCharts(_ json: String) async throws -> String { try await call("vedic-charts", "special-lagna-charts", json) }
     /// Bhav Chalit Chart & Bhava Table.
     public func bhavChalit(_ json: String) async throws -> String { try await call("vedic-charts", "bhav-chalit", json) }
-    /// Chandra Kundali (Moon Chart).
+    /// Chandra Kundli (Moon Chart).
     public func chandraKundali(_ json: String) async throws -> String { try await call("vedic-charts", "chandra-kundali", json) }
     /// Chakra Charts.
     public func chakraCharts(_ json: String) async throws -> String { try await call("vedic-charts", "chakra-charts", json) }
@@ -83,7 +83,7 @@ public final class Astro96Client: @unchecked Sendable {
     public func vargaTables(_ json: String) async throws -> String { try await call("strengths", "varga-tables", json) }
     /// Chart Image Styles.
     public func chartImageStyles(_ json: String) async throws -> String { try await call("vedic-charts", "chart-image-styles", json) }
-    /// Rasi (D1).
+    /// Rashi (D1).
     public func divisionalChartD1(_ json: String) async throws -> String { try await call("vedic-charts", "divisional-chart-d1", json) }
     /// Hora (D2).
     public func divisionalChartD2(_ json: String) async throws -> String { try await call("vedic-charts", "divisional-chart-d2", json) }
@@ -97,7 +97,7 @@ public final class Astro96Client: @unchecked Sendable {
     public func divisionalChartD7(_ json: String) async throws -> String { try await call("vedic-charts", "divisional-chart-d7", json) }
     /// Ashtamsha (D8).
     public func divisionalChartD8(_ json: String) async throws -> String { try await call("vedic-charts", "divisional-chart-d8", json) }
-    /// Navamsa (D9).
+    /// Navamsha (D9).
     public func divisionalChartD9(_ json: String) async throws -> String { try await call("vedic-charts", "divisional-chart-d9", json) }
     /// Dashamsha (D10).
     public func divisionalChartD10(_ json: String) async throws -> String { try await call("vedic-charts", "divisional-chart-d10", json) }
@@ -127,7 +127,7 @@ public final class Astro96Client: @unchecked Sendable {
     public func divisionalChartD144(_ json: String) async throws -> String { try await call("vedic-charts", "divisional-chart-d144", json) }
     /// Nadiamsha (D150).
     public func divisionalChartD150(_ json: String) async throws -> String { try await call("vedic-charts", "divisional-chart-d150", json) }
-    /// D300.
+    /// 300-fold division (D300).
     public func divisionalChartD300(_ json: String) async throws -> String { try await call("vedic-charts", "divisional-chart-d300", json) }
     /// Hora Lagna Chart.
     public func specialLagnaHora(_ json: String) async throws -> String { try await call("vedic-charts", "special-lagna-hora", json) }
@@ -169,11 +169,11 @@ public final class Astro96Client: @unchecked Sendable {
     public func house(_ json: String) async throws -> String { try await call("vedic-charts", "house", json) }
     /// Chart from Any Reference Point.
     public func chartFromReference(_ json: String) async throws -> String { try await call("vedic-charts", "chart-from-reference", json) }
-    /// Ashtakavarga (in bundle).
+    /// Ashtakavarga (Kundli bundle).
     public func ashtakavargaBundle(_ json: String) async throws -> String { try await call("strengths", "ashtakavarga-bundle", json) }
     /// Shadbala.
     public func shadbala(_ json: String) async throws -> String { try await call("strengths", "shadbala", json) }
-    /// Saptbal Strength Table.
+    /// Saptbal (Seven-fold Strength) Table.
     public func saptbal(_ json: String) async throws -> String { try await call("strengths", "saptbal", json) }
     /// Vimshopaka Bala.
     public func vimshopakaBala(_ json: String) async throws -> String { try await call("strengths", "vimshopaka-bala", json) }
@@ -231,7 +231,7 @@ public final class Astro96Client: @unchecked Sendable {
     public func vargaSigns(_ json: String) async throws -> String { try await call("strengths", "varga-signs", json) }
     /// Dignity in the Sixteen Vargas.
     public func vargaDignities(_ json: String) async throws -> String { try await call("strengths", "varga-dignities", json) }
-    /// Vaiseshikamsa.
+    /// Vaisheshikamsha.
     public func vaiseshikamsa(_ json: String) async throws -> String { try await call("strengths", "vaiseshikamsa", json) }
     /// Varga Deities.
     public func vargaDeities(_ json: String) async throws -> String { try await call("strengths", "varga-deities", json) }
@@ -243,6 +243,8 @@ public final class Astro96Client: @unchecked Sendable {
     public func yoginiDasha(_ json: String) async throws -> String { try await call("dashas", "yogini-dasha", json) }
     /// Chara Dasha (Jaimini).
     public func charaDasha(_ json: String) async throws -> String { try await call("dashas", "chara-dasha", json) }
+    /// Narayana Dasha (Jaimini).
+    public func narayanaDasha(_ json: String) async throws -> String { try await call("dashas", "narayana-dasha", json) }
     /// Niryana Shoola Dasha.
     public func niryanaShoolaDasha(_ json: String) async throws -> String { try await call("dashas", "niryana-shoola-dasha", json) }
     /// Trikona Dasha.
@@ -301,13 +303,13 @@ public final class Astro96Client: @unchecked Sendable {
     public func kpFortuna(_ json: String) async throws -> String { try await call("kp", "kp-fortuna", json) }
     /// Natal Sahams.
     public func natalSahams(_ json: String) async throws -> String { try await call("tajika", "natal-sahams", json) }
-    /// Manglik Dosha (in bundle).
+    /// Manglik Dosha (Kundli bundle).
     public func manglikDosha(_ json: String) async throws -> String { try await call("doshas-yogas", "manglik-dosha", json) }
-    /// Kaal Sarp & Pitra Dosha (in bundle).
+    /// Kaal Sarp & Pitra Dosha (Kundli bundle).
     public func bundleKaalsarpPitra(_ json: String) async throws -> String { try await call("doshas-yogas", "bundle-kaalsarp-pitra", json) }
     /// Sade Sati Periods.
     public func sadeSati(_ json: String) async throws -> String { try await call("doshas-yogas", "sade-sati", json) }
-    /// Dosh Report.
+    /// Dosha Report.
     public func doshReport(_ json: String) async throws -> String { try await call("doshas-yogas", "dosh-report", json) }
     /// Sade Sati Now.
     public func sadeSatiCurrent(_ json: String) async throws -> String { try await call("doshas-yogas", "sade-sati-current", json) }
@@ -317,11 +319,11 @@ public final class Astro96Client: @unchecked Sendable {
     public func lifetimeMaleficTransits(_ json: String) async throws -> String { try await call("predictions", "lifetime-malefic-transits", json) }
     /// Ayurdaya (Longevity Estimate) & Age.
     public func ayurdaya(_ json: String) async throws -> String { try await call("predictions", "ayurdaya", json) }
-    /// Personal Characteristics (in bundle).
+    /// Personal Characteristics (Kundli bundle).
     public func personalCharacteristicsBundle(_ json: String) async throws -> String { try await call("predictions", "personal-characteristics-bundle", json) }
-    /// Numerology (in bundle).
+    /// Numerology (Kundli bundle).
     public func numerologyBundle(_ json: String) async throws -> String { try await call("numerology", "numerology-bundle", json) }
-    /// BNN Charts (in bundle).
+    /// BNN Charts (Kundli bundle).
     public func bnnBundleCharts(_ json: String) async throws -> String { try await call("bnn", "bnn-bundle-charts", json) }
     /// D1 Markers (Vargottama, Pushkara).
     public func d1Markers(_ json: String) async throws -> String { try await call("vedic-charts", "d1-markers", json) }
@@ -363,7 +365,7 @@ public final class Astro96Client: @unchecked Sendable {
     public func horaTable(_ json: String) async throws -> String { try await call("panchang", "hora-table", json) }
     /// Disha Shoola & Vasa.
     public func vasaShoola(_ json: String) async throws -> String { try await call("panchang", "vasa-shoola", json) }
-    /// Tarabalam & Chandrabalam.
+    /// Tara Bala & Chandra Bala.
     public func taraChandraBala(_ json: String) async throws -> String { try await call("panchang", "tara-chandra-bala", json) }
     /// Sunrise Chart & Planet Positions.
     public func sunriseChart(_ json: String) async throws -> String { try await call("panchang", "sunrise-chart", json) }
@@ -379,7 +381,7 @@ public final class Astro96Client: @unchecked Sendable {
     public func timeHeatmap(_ json: String) async throws -> String { try await call("panchang", "time-heatmap", json) }
     /// Monthly Panchang.
     public func monthlyPanchang(_ json: String) async throws -> String { try await call("panchang", "monthly-panchang", json) }
-    /// Panchanga Sequence & Udaya Lagna.
+    /// Panchang Sequence & Udaya Lagna.
     public func panchangaSequence(_ json: String) async throws -> String { try await call("panchang", "panchanga-sequence", json) }
     /// Tamil Solar Calendar.
     public func tamilCalendar(_ json: String) async throws -> String { try await call("panchang", "tamil-calendar", json) }
@@ -469,9 +471,9 @@ public final class Astro96Client: @unchecked Sendable {
     public func kumbhaChakra(_ json: String) async throws -> String { try await call("panchang", "kumbha-chakra", json) }
     /// Bhadra Vasa.
     public func bhadraVasa(_ json: String) async throws -> String { try await call("panchang", "bhadra-vasa", json) }
-    /// Chandrabalam.
+    /// Chandra Bala.
     public func chandrabalam(_ json: String) async throws -> String { try await call("panchang", "chandrabalam", json) }
-    /// Tarabalam.
+    /// Tara Bala.
     public func tarabalam(_ json: String) async throws -> String { try await call("panchang", "tarabalam", json) }
     /// Panchak.
     public func panchak(_ json: String) async throws -> String { try await call("panchang", "panchak", json) }
@@ -501,6 +503,14 @@ public final class Astro96Client: @unchecked Sendable {
     public func sankranti(_ json: String) async throws -> String { try await call("panchang", "sankranti", json) }
     /// Vrat Calendar.
     public func vratCalendar(_ json: String) async throws -> String { try await call("festivals-muhurta", "vrat-calendar", json) }
+    /// Festival Calendar.
+    public func festivalCalendar(_ json: String) async throws -> String { try await call("festivals-muhurta", "festival-calendar", json) }
+    /// Religious Calendars.
+    public func religiousCalendar(_ json: String) async throws -> String { try await call("festivals-muhurta", "religious-calendar", json) }
+    /// Ekadashi Calendar.
+    public func ekadashiCalendar(_ json: String) async throws -> String { try await call("festivals-muhurta", "ekadashi-calendar", json) }
+    /// Wedding Plan.
+    public func weddingPlan(_ json: String) async throws -> String { try await call("festivals-muhurta", "wedding-plan", json) }
     /// Vrat Observance Catalogue.
     public func vratObservances(_ json: String) async throws -> String { try await call("festivals-muhurta", "vrat-observances", json) }
     /// Muhurta Finder.
@@ -511,6 +521,8 @@ public final class Astro96Client: @unchecked Sendable {
     public func shraddhaDates(_ json: String) async throws -> String { try await call("festivals-muhurta", "shraddha-dates", json) }
     /// Sahasra Chandrodaya.
     public func sahasraChandrodaya(_ json: String) async throws -> String { try await call("festivals-muhurta", "sahasra-chandrodaya", json) }
+    /// Baby Name Check.
+    public func babyNames(_ json: String) async throws -> String { try await call("festivals-muhurta", "baby-names", json) }
     /// Name Syllables (Naamakshar).
     public func nameSyllables(_ json: String) async throws -> String { try await call("festivals-muhurta", "name-syllables", json) }
     /// Kundli Matching (Ayu Milan).
@@ -643,9 +655,9 @@ public final class Astro96Client: @unchecked Sendable {
     public func parashariYogaTwoPlanetConjunctions(_ json: String) async throws -> String { try await call("doshas-yogas", "parashari-yoga-two-planet-conjunctions", json) }
     /// Parashari Yogas: Raja sambandha.
     public func parashariYogaRajaSambandhaYogas(_ json: String) async throws -> String { try await call("doshas-yogas", "parashari-yoga-raja-sambandha-yogas", json) }
-    /// Mangal Dosha.
+    /// Manglik Dosha (yoga rule).
     public func doshaMangal(_ json: String) async throws -> String { try await call("doshas-yogas", "dosha-mangal", json) }
-    /// Kala Sarpa Dosha.
+    /// Kaal Sarp Dosha (yoga rule).
     public func doshaKalaSarpa(_ json: String) async throws -> String { try await call("doshas-yogas", "dosha-kala-sarpa", json) }
     /// Grahan Dosha.
     public func doshaGrahan(_ json: String) async throws -> String { try await call("doshas-yogas", "dosha-grahan", json) }
@@ -831,6 +843,10 @@ public final class Astro96Client: @unchecked Sendable {
     public func westernPlanetaryReturns(_ json: String) async throws -> String { try await call("western", "western-planetary-returns", json) }
     /// Fixed Stars.
     public func westernFixedStars(_ json: String) async throws -> String { try await call("western", "western-fixed-stars", json) }
+    /// Harmonic Chart.
+    public func westernHarmonicChart(_ json: String) async throws -> String { try await call("western", "western-harmonic-chart", json) }
+    /// Electional Search.
+    public func westernElectional(_ json: String) async throws -> String { try await call("western", "western-electional", json) }
     /// Davison Relationship Chart.
     public func westernDavisonChart(_ json: String) async throws -> String { try await call("western", "western-davison-chart", json) }
     /// Composite Relationship Chart.
@@ -909,7 +925,7 @@ public final class Astro96Client: @unchecked Sendable {
     public func reportRelocation(_ json: String) async throws -> String { try await call("reports", "report-relocation", json) }
     /// Spiritual Report.
     public func reportSpiritual(_ json: String) async throws -> String { try await call("reports", "report-spiritual", json) }
-    /// Classical Kundli Report Bundles.
+    /// Classical Kundli Packages.
     public func classicalKundliReport(_ json: String) async throws -> String { try await call("reports", "classical-kundli-report", json) }
     /// Kundli Matching Report.
     public func matchingReport(_ json: String) async throws -> String { try await call("reports", "matching-report", json) }
@@ -929,7 +945,7 @@ public final class Astro96Client: @unchecked Sendable {
     public func locationKpAnalysis(_ json: String) async throws -> String { try await call("location-astrology", "location-kp-analysis", json) }
     /// Compare Two Places.
     public func compareLocations(_ json: String) async throws -> String { try await call("location-astrology", "compare-locations", json) }
-    /// Char Dasha Schedule (Phaladeepika).
+    /// Chara Dasha Schedule (Phaladeepika).
     public func locationCharDasha(_ json: String) async throws -> String { try await call("location-astrology", "location-char-dasha", json) }
     /// Yogini Dasha Schedule.
     public func locationYoginiDasha(_ json: String) async throws -> String { try await call("location-astrology", "location-yogini-dasha", json) }
@@ -971,7 +987,7 @@ public final class Astro96Client: @unchecked Sendable {
     public func vastuExplainDefect(_ json: String) async throws -> String { try await call("ai", "vastu-explain-defect", json) }
     /// Vastu Remedy Ranking (AI).
     public func vastuRankRemedies(_ json: String) async throws -> String { try await call("ai", "vastu-rank-remedies", json) }
-    /// Mundane: Panchanga snapshot.
+    /// Mundane: Panchang snapshot.
     public func mundanePanchanga(_ json: String) async throws -> String { try await call("mundane", "mundane-panchanga", json) }
     /// Mundane: Samvatsara.
     public func mundaneSamvatsara(_ json: String) async throws -> String { try await call("mundane", "mundane-samvatsara", json) }
@@ -1125,6 +1141,10 @@ public final class Astro96Client: @unchecked Sendable {
     public func careerFields(_ json: String) async throws -> String { try await call("reports", "career-fields", json) }
     /// Foreign Settlement Timing.
     public func foreignTiming(_ json: String) async throws -> String { try await call("reports", "foreign-timing", json) }
+    /// Children Timing.
+    public func childrenTiming(_ json: String) async throws -> String { try await call("reports", "children-timing", json) }
+    /// Property Purchase Timing.
+    public func propertyTiming(_ json: String) async throws -> String { try await call("reports", "property-timing", json) }
     /// Sarvatobhadra Chakra.
     public func sarvatobhadraChakra(_ json: String) async throws -> String { try await call("predictions", "sarvatobhadra-chakra", json) }
     /// Varshaphal Harsha Bala.
@@ -1141,6 +1161,8 @@ public final class Astro96Client: @unchecked Sendable {
     public func numerologyDaily(_ json: String) async throws -> String { try await call("numerology", "numerology-daily", json) }
     /// Vastu Entrance Pada.
     public func vastuEntrancePada(_ json: String) async throws -> String { try await call("vastu", "vastu-entrance-pada", json) }
+    /// Vastu Room Placement Reading.
+    public func vastuRoomPlacement(_ json: String) async throws -> String { try await call("vastu", "vastu-room-placement", json) }
     /// Vastu 81-Pada Grid.
     public func vastuPadaGrid(_ json: String) async throws -> String { try await call("vastu", "vastu-pada-grid", json) }
     /// Complete Kundli Report.
@@ -1293,6 +1315,8 @@ public final class Astro96Client: @unchecked Sendable {
     public func nakshatraDailyAreas(_ json: String) async throws -> String { try await call("predictions", "nakshatra-daily-areas", json) }
     /// Panchang Limb Details.
     public func panchangLimbDetails(_ json: String) async throws -> String { try await call("panchang", "panchang-limb-details", json) }
+    /// Compare Methods.
+    public func compareMethods(_ json: String) async throws -> String { try await call("utilities", "compare-methods", json) }
     /// Ayanamsha List.
     public func ayanamshaList(_ json: String) async throws -> String { try await call("utilities", "ayanamsha-list", json) }
     /// Personal Year, Month and Day Readings.
