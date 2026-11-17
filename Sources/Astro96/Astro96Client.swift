@@ -1315,6 +1315,8 @@ public final class Astro96Client: @unchecked Sendable {
     public func nakshatraDailyAreas(_ json: String) async throws -> String { try await call("predictions", "nakshatra-daily-areas", json) }
     /// Panchang Limb Details.
     public func panchangLimbDetails(_ json: String) async throws -> String { try await call("panchang", "panchang-limb-details", json) }
+    /// Panchang Lagna Table.
+    public func panchangLagnaTable(_ json: String) async throws -> String { try await call("panchang", "panchang-lagna-table", json) }
     /// Compare Methods.
     public func compareMethods(_ json: String) async throws -> String { try await call("utilities", "compare-methods", json) }
     /// Ayanamsha List.
