@@ -1181,6 +1181,8 @@ public final class Astro96Client: @unchecked Sendable {
     public func humanDesignActivations(_ json: String) async throws -> String { try await call("human-design", "human-design-activations", json) }
     /// Human Design Centers and Channels.
     public func humanDesignCentersChannels(_ json: String) async throws -> String { try await call("human-design", "human-design-centers-channels", json) }
+    /// Human Design Bodygraph.
+    public func humanDesignBodygraph(_ json: String) async throws -> String { try await call("human-design", "human-design-bodygraph", json) }
     /// Human Design Analysis.
     public func humanDesignAnalysis(_ json: String) async throws -> String { try await call("human-design", "human-design-analysis", json) }
     /// Human Design Traits.
