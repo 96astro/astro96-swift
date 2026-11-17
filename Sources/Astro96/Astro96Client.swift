@@ -1347,4 +1347,14 @@ public final class Astro96Client: @unchecked Sendable {
     public func aiMatchChat(_ json: String) async throws -> String { try await call("ai", "ai-match-chat", json) }
     /// AI Chat, Western.
     public func aiWesternChat(_ json: String) async throws -> String { try await call("ai", "ai-western-chat", json) }
+    /// Big Three Portrait.
+    public func reportBigThree(_ json: String) async throws -> String { try await call("reports", "report-big-three", json) }
+    /// Five-Year Journey.
+    public func reportFiveYear(_ json: String) async throws -> String { try await call("reports", "report-five-year", json) }
+    /// Personal Transit Forecast.
+    public func reportTransitForecast(_ json: String) async throws -> String { try await call("reports", "report-transit-forecast", json) }
+    /// Past-Life Themes.
+    public func reportPastLife(_ json: String) async throws -> String { try await call("reports", "report-past-life", json) }
+    /// Child Personality.
+    public func reportChildPersonality(_ json: String) async throws -> String { try await call("reports", "report-child-personality", json) }
 }
