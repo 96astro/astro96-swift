@@ -11,15 +11,88 @@ public struct Astro96Error: Error {
     public let body: String
 }
 
+/// An optional identity of YOUR app, sent as `X-Astro-App` so you (and we) can see which app calls the API. The name is required:
+/// printable ASCII, at most 60 characters, no slash or parentheses; the version at most 40 and the url (http or https) at most 120.
+public struct Astro96AppInfo: Sendable {
+    public let name: String
+    public let version: String?
+    public let url: String?
+
+    public init(name: String, version: String? = nil, url: String? = nil) {
+        self.name = name
+        self.version = version
+        self.url = url
+    }
+
+    private static func printable(_ s: String) -> Bool { s.unicodeScalars.allSatisfy { $0.value >= 0x20 && $0.value <= 0x7e } }
+
+    /// The `X-Astro-App` header value `name/version (+url)`, or nil with the reason when the identity is not valid. The client
+    /// refuses to start with an invalid one; call this first to check an identity you read from configuration.
+    public func header() -> (value: String?, problem: String?) {
+        let n = name.trimmingCharacters(in: .whitespaces)
+        if n.isEmpty { return (nil, "appInfo: name is required") }
+        if !Self.printable(n) || n.count > 60 || n.contains("/") || n.contains("(") || n.contains(")") {
+            return (nil, "appInfo: name must be printable ASCII, at most 60 characters, without / or parentheses")
+        }
+        var out = n
+        if let v = version, !v.isEmpty {
+            if !Self.printable(v) || v.count > 40 || v.contains(" ") || v.contains("(") || v.contains(")") {
+                return (nil, "appInfo: version must be printable ASCII without spaces or parentheses, at most 40 characters")
+            }
+            out += "/" + v
+        }
+        if let u = url, !u.isEmpty {
+            if !Self.printable(u) || u.count > 120 || u.contains(" ") || u.contains("(") || u.contains(")") {
+                return (nil, "appInfo: url must be printable ASCII without spaces or parentheses, at most 120 characters")
+            }
+            let parts = URLComponents(string: u)
+            guard let scheme = parts?.scheme?.lowercased(), scheme == "http" || scheme == "https", !(parts?.host ?? "").isEmpty else {
+                return (nil, "appInfo: url must be an http(s) URL")
+            }
+            out += " (+" + u + ")"
+        }
+        return (out, nil)
+    }
+}
+
 /// The 96Astro API. Requests and responses are JSON strings. Call it from your server: never ship a secret key in an app.
 public final class Astro96Client: @unchecked Sendable {
     private let apiKey: String
     private let baseURL: String
     private let maxRetries: Int
+    private let app: String?
+    private let userAgent: String
 
-    public init(apiKey: String, baseURL: String = "https://api.96astroapi.com/v1", maxRetries: Int = 3) {
+    #if os(iOS) || os(tvOS) || os(watchOS)
+    private static let platform = "ios"
+    #elseif os(macOS)
+    private static let platform = "macos"
+    #elseif os(Linux)
+    private static let platform = "linux"
+    #elseif os(Windows)
+    private static let platform = "windows"
+    #else
+    private static let platform = "other"
+    #endif
+
+    public init(apiKey: String, baseURL: String = "https://api.96astroapi.com/v1", maxRetries: Int = 3, appInfo: Astro96AppInfo? = nil) {
+        precondition(!apiKey.isEmpty, "apiKey is required")
+        if let appInfo {
+            let h = appInfo.header()
+            precondition(h.problem == nil, h.problem ?? "")
+            self.app = h.value
+        } else {
+            self.app = nil
+        }
+        self.userAgent = "96astro-swift/0.3.0 plt/" + Astro96Client.platform
+        let trimmed = baseURL.hasSuffix("/") ? String(baseURL.dropLast()) : baseURL
+        // The key is sent on every call, so only https is accepted (plain http only for localhost).
+        let parts = URLComponents(string: trimmed)
+        let host = parts?.host ?? ""
+        precondition(parts?.scheme == "https" || (parts?.scheme == "http" && ["localhost", "127.0.0.1", "::1"].contains(host)),
+                     "baseURL must use https (plain http is allowed only for localhost): the API key would travel unencrypted")
         self.apiKey = apiKey
-        self.baseURL = baseURL.hasSuffix("/") ? String(baseURL.dropLast()) : baseURL
+        self.baseURL = trimmed
         self.maxRetries = maxRetries
     }
 
@@ -38,6 +111,8 @@ public final class Astro96Client: @unchecked Sendable {
             var req = URLRequest(url: URL(string: baseURL + path)!, timeoutInterval: 180)
             req.httpMethod = method
             req.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+            req.setValue(userAgent, forHTTPHeaderField: "User-Agent")
+            if let app { req.setValue(app, forHTTPHeaderField: "X-Astro-App") }
             if let json {
                 req.httpBody = Data(json.utf8)
                 req.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -1369,4 +1444,266 @@ public final class Astro96Client: @unchecked Sendable {
     public func reportAllSignsCompatibility(_ json: String) async throws -> String { try await call("reports", "report-all-signs-compatibility", json) }
     /// Chart Blueprint.
     public func reportChartBlueprint(_ json: String) async throws -> String { try await call("reports", "report-chart-blueprint", json) }
+    /// FLAMES Calculator.
+    public func flames(_ json: String) async throws -> String { try await call("numerology", "flames", json) }
+    /// Love Calculator.
+    public func loveCalculator(_ json: String) async throws -> String { try await call("numerology", "love-calculator", json) }
+    /// Friendship Calculator.
+    public func friendshipCalculator(_ json: String) async throws -> String { try await call("numerology", "friendship-calculator", json) }
+    /// Name Compatibility.
+    public func nameCompatibility(_ json: String) async throws -> String { try await call("numerology", "name-compatibility", json) }
+    /// Vehicle Number Numerology.
+    public func vehicleNumberNumerology(_ json: String) async throws -> String { try await call("numerology", "vehicle-number-numerology", json) }
+    /// Mobile Number Numerology.
+    public func mobileNumberNumerology(_ json: String) async throws -> String { try await call("numerology", "mobile-number-numerology", json) }
+    /// Numerology Yearly Forecast.
+    public func numerologyYearlyForecast(_ json: String) async throws -> String { try await call("numerology", "numerology-yearly-forecast", json) }
+    /// Name Correction.
+    public func nameCorrection(_ json: String) async throws -> String { try await call("numerology", "name-correction", json) }
+    /// Age Calculator.
+    public func ageCalculator(_ json: String) async throws -> String { try await call("utilities", "age-calculator", json) }
+    /// Love, Career, Finance and Health Horoscope.
+    public func signHoroscopeTopics(_ json: String) async throws -> String { try await call("predictions", "sign-horoscope-topics", json) }
+    /// Love Horoscope.
+    public func loveHoroscope(_ json: String) async throws -> String { try await call("predictions", "love-horoscope", json) }
+    /// Career Horoscope.
+    public func careerHoroscope(_ json: String) async throws -> String { try await call("predictions", "career-horoscope", json) }
+    /// Finance Horoscope.
+    public func financeHoroscope(_ json: String) async throws -> String { try await call("predictions", "finance-horoscope", json) }
+    /// Health Horoscope.
+    public func healthHoroscope(_ json: String) async throws -> String { try await call("predictions", "health-horoscope", json) }
+    /// Mantra Library.
+    public func mantraLibrary(_ json: String) async throws -> String { try await call("remedies", "mantra-library", json) }
+    /// Mole Astrology (Samudrika Shastra).
+    public func moleAstrology(_ json: String) async throws -> String { try await call("predictions", "mole-astrology", json) }
+    /// Karz Mukti (Debt Relief) Report.
+    public func reportKarzMukti(_ json: String) async throws -> String { try await call("reports", "report-karz-mukti", json) }
+    /// Dhan Yog (Wealth Yoga) Report.
+    public func reportDhanYog(_ json: String) async throws -> String { try await call("reports", "report-dhan-yog", json) }
+    /// Bhagya (Fortune) Report.
+    public func reportBhagya(_ json: String) async throws -> String { try await call("reports", "report-bhagya", json) }
+    /// Lal Kitab Kundli Report.
+    public func reportLalKitabKundli(_ json: String) async throws -> String { try await call("reports", "report-lal-kitab-kundli", json) }
+    /// Panchaka Rahita Muhurta.
+    public func panchakaRahita(_ json: String) async throws -> String { try await call("festivals-muhurta", "panchaka-rahita", json) }
+    /// Do Ghati Muhurta.
+    public func doGhatiMuhurta(_ json: String) async throws -> String { try await call("festivals-muhurta", "do-ghati-muhurta", json) }
+    /// Ishtakala (Time Since Sunrise).
+    public func ishtakala(_ json: String) async throws -> String { try await call("panchang", "ishtakala", json) }
+    /// Graha Asta and Uday (Combustion Dates).
+    public func grahaAstaUday(_ json: String) async throws -> String { try await call("panchang", "graha-asta-uday", json) }
+    /// Mahadvadashi Calendar.
+    public func mahadvadashiCalendar(_ json: String) async throws -> String { try await call("festivals-muhurta", "mahadvadashi-calendar", json) }
+    /// ISKCON (Gaurabda) Calendar.
+    public func iskconCalendar(_ json: String) async throws -> String { try await call("festivals-muhurta", "iskcon-calendar", json) }
+    /// Jain Pachchakkhan Times.
+    public func jainPachchakkhan(_ json: String) async throws -> String { try await call("festivals-muhurta", "jain-pachchakkhan", json) }
+    /// Upakarma (Avani Avittam) Dates.
+    public func upakarmaDates(_ json: String) async throws -> String { try await call("festivals-muhurta", "upakarma-dates", json) }
+    /// Kumbh Mela Dates.
+    public func kumbhMelaDates(_ json: String) async throws -> String { try await call("festivals-muhurta", "kumbh-mela-dates", json) }
+    /// Vastu Plot Analysis.
+    public func vastuPlotAnalysis(_ json: String) async throws -> String { try await call("vastu", "vastu-plot-analysis", json) }
+    /// Vastu Remedies, Colours and Elements by Room and Zone.
+    public func vastuZoneRemedies(_ json: String) async throws -> String { try await call("vastu", "vastu-zone-remedies", json) }
+    /// Griha-Pravesh and Foundation Muhurta.
+    public func vastuMuhurta(_ json: String) async throws -> String { try await call("vastu", "vastu-muhurta", json) }
+    /// Vastu Zone and Defect Overlay Image.
+    public func vastuOverlayImage(_ json: String) async throws -> String { try await call("vastu", "vastu-overlay-image", json) }
+    /// Vastu Report.
+    public func vastuReport(_ json: String) async throws -> String { try await call("vastu", "vastu-report", json) }
+    /// Vastu Sources and Conventions.
+    public func vastuSources(_ json: String) async throws -> String { try await call("vastu", "vastu-sources", json) }
+    /// Arabic Lots.
+    public func arabicLots(_ json: String) async throws -> String { try await call("western", "arabic-lots", json) }
+    /// Draconic Chart.
+    public func draconicChart(_ json: String) async throws -> String { try await call("western", "draconic-chart", json) }
+    /// Antiscia and Contra-antiscia.
+    public func antiscia(_ json: String) async throws -> String { try await call("western", "antiscia", json) }
+    /// Planetary Hours.
+    public func planetaryHours(_ json: String) async throws -> String { try await call("western", "planetary-hours", json) }
+    /// Dream Interpretation.
+    public func dreamInterpretation(_ json: String) async throws -> String { try await call("predictions", "dream-interpretation", json) }
+    /// Dream Symbol Library.
+    public func dreamSymbolLibrary(_ json: String) async throws -> String { try await call("predictions", "dream-symbol-library", json) }
+    /// I-Ching Cast.
+    public func iChingCast(_ json: String) async throws -> String { try await call("chinese", "i-ching-cast", json) }
+    /// I-Ching Hexagram.
+    public func iChingHexagram(_ json: String) async throws -> String { try await call("chinese", "i-ching-hexagram", json) }
+    /// Kalachakra Dasha.
+    public func kalachakraDasha(_ json: String) async throws -> String { try await call("dashas", "kalachakra-dasha", json) }
+    /// Sudasa (Sree Lagna Dasha).
+    public func sudasaDasha(_ json: String) async throws -> String { try await call("dashas", "sudasa-dasha", json) }
+    /// Drig Dasha (Jaimini).
+    public func drigDasha(_ json: String) async throws -> String { try await call("dashas", "drig-dasha", json) }
+    /// Mandooka Dasha (Jaimini).
+    public func mandookaDasha(_ json: String) async throws -> String { try await call("dashas", "mandooka-dasha", json) }
+    /// Aspect Patterns.
+    public func aspectPatterns(_ json: String) async throws -> String { try await call("western", "aspect-patterns", json) }
+    /// Annual Profections.
+    public func annualProfections(_ json: String) async throws -> String { try await call("western", "annual-profections", json) }
+    /// Firdaria.
+    public func firdaria(_ json: String) async throws -> String { try await call("western", "firdaria", json) }
+    /// Zodiacal Releasing.
+    public func zodiacalReleasing(_ json: String) async throws -> String { try await call("western", "zodiacal-releasing", json) }
+    /// Essential Dignities and Almuten.
+    public func essentialDignities(_ json: String) async throws -> String { try await call("western", "essential-dignities", json) }
+    /// Midpoints and Midpoint Tree.
+    public func midpoints(_ json: String) async throws -> String { try await call("western", "midpoints", json) }
+    /// Declination Parallels.
+    public func declinationParallels(_ json: String) async throws -> String { try await call("western", "declination-parallels", json) }
+    /// Monthly Aspects.
+    public func monthlyAspects(_ json: String) async throws -> String { try await call("western", "monthly-aspects", json) }
+    /// Ephemeris Range Table.
+    public func ephemerisRange(_ json: String) async throws -> String { try await call("utilities", "ephemeris-range", json) }
+    /// KP Ruling Planets.
+    public func kpRulingPlanets(_ json: String) async throws -> String { try await call("kp", "kp-ruling-planets", json) }
+    /// KP Ruling Planet Changes.
+    public func kpRulingPlanetChanges(_ json: String) async throws -> String { try await call("kp", "kp-ruling-planet-changes", json) }
+    /// KP Sub-lord and Rasi Change Times.
+    public func kpSublordChanges(_ json: String) async throws -> String { try await call("kp", "kp-sublord-changes", json) }
+    /// Panchang Full-Day Limbs and Intervals.
+    public func panchangFullDay(_ json: String) async throws -> String { try await call("panchang", "panchang-full-day", json) }
+    /// Sankranti Detail.
+    public func sankrantiDetail(_ json: String) async throws -> String { try await call("festivals-muhurta", "sankranti-detail", json) }
+    /// Calendar Export (ICS).
+    public func calendarIcs(_ json: String) async throws -> String { try await call("festivals-muhurta", "calendar-ics", json) }
+    /// Panchang Shuddhi Assessment.
+    public func panchangShuddhi(_ json: String) async throws -> String { try await call("panchang", "panchang-shuddhi", json) }
+    /// Vastu Rule Packs.
+    public func vastuRulePacks(_ json: String) async throws -> String { try await call("vastu", "vastu-rule-packs", json) }
+    /// Vastu Plan Geometry Check.
+    public func vastuValidateGeometry(_ json: String) async throws -> String { try await call("vastu", "vastu-validate-geometry", json) }
+    /// Vastu Corrected Layout.
+    public func vastuCorrectedLayout(_ json: String) async throws -> String { try await call("vastu", "vastu-corrected-layout", json) }
+    /// Eight Mansions Kua and Personal Directions (Feng Shui).
+    public func eightMansionsKua(_ json: String) async throws -> String { try await call("chinese", "eight-mansions-kua", json) }
+    /// Sankranti Vahana.
+    public func sankrantiVahana(_ json: String) async throws -> String { try await call("festivals-muhurta", "sankranti-vahana", json) }
+    /// Samvatsara Names.
+    public func samvatsaraNames(_ json: String) async throws -> String { try await call("panchang", "samvatsara-names", json) }
+    /// Mantri Mandala.
+    public func mantriMandala(_ json: String) async throws -> String { try await call("panchang", "mantri-mandala", json) }
+    /// Festival Puja Windows.
+    public func festivalPujaWindows(_ json: String) async throws -> String { try await call("festivals-muhurta", "festival-puja-windows", json) }
+    /// Planetary Events in Detail.
+    public func planetaryEventsDetail(_ json: String) async throws -> String { try await call("panchang", "planetary-events-detail", json) }
+    /// Vrat Calendar: More Observances.
+    public func vratCalendarMore(_ json: String) async throws -> String { try await call("festivals-muhurta", "vrat-calendar-more", json) }
+    /// Muhurta Finder in Detail.
+    public func muhurtaFinderDetail(_ json: String) async throws -> String { try await call("festivals-muhurta", "muhurta-finder-detail", json) }
+    /// Jain Prahars and the Prahar in Force.
+    public func jainPrahars(_ json: String) async throws -> String { try await call("festivals-muhurta", "jain-prahars", json) }
+    /// Lagna Table with Pushkara Navamsha.
+    public func lagnaPushkaraNavamsha(_ json: String) async throws -> String { try await call("panchang", "lagna-pushkara-navamsha", json) }
+    /// Name to Rashi.
+    public func nameToRashi(_ json: String) async throws -> String { try await call("festivals-muhurta", "name-to-rashi", json) }
+    /// Solstices and Equinoxes.
+    public func solsticeEquinox(_ json: String) async throws -> String { try await call("panchang", "solstice-equinox", json) }
+    /// Six Seasons (Ritu) of a Year.
+    public func rituTable(_ json: String) async throws -> String { try await call("panchang", "ritu-table", json) }
+    /// ISKCON Skipped Tithi and Arunodaya Tithi.
+    public func iskconSkippedTithi(_ json: String) async throws -> String { try await call("festivals-muhurta", "iskcon-skipped-tithi", json) }
+    /// Running Choghadiya and Hora.
+    public func panchangRunningPeriods(_ json: String) async throws -> String { try await call("panchang", "panchang-running-periods", json) }
+    /// Rule Registry.
+    public func ruleRegistry(_ json: String) async throws -> String { try await call("utilities", "rule-registry", json) }
+    /// Weekday Deities Directory.
+    public func weekdayDeities(_ json: String) async throws -> String { try await call("festivals-muhurta", "weekday-deities", json) }
+    /// Vivah Lagna Windows.
+    public func vivahLagnaWindows(_ json: String) async throws -> String { try await call("festivals-muhurta", "vivah-lagna-windows", json) }
+    /// Traditional Panchang (Surya Siddhanta).
+    public func panchangTraditional(_ json: String) async throws -> String { try await call("panchang", "panchang-traditional", json) }
+    /// Navratri Calendar (Sharad and Chaitra).
+    public func navratriCalendar(_ json: String) async throws -> String { try await call("festivals-muhurta", "navratri-calendar", json) }
+    /// Durga Puja Calendar (Shashthi to Bijoya Dashami).
+    public func durgaPujaCalendar(_ json: String) async throws -> String { try await call("festivals-muhurta", "durga-puja-calendar", json) }
+    /// Festival Group Calendars (Diwali, Sankranti, Holi, Onam).
+    public func festivalGroup(_ json: String) async throws -> String { try await call("festivals-muhurta", "festival-group", json) }
+    /// Regional Festivals by Calendar.
+    public func regionalFestivals(_ json: String) async throws -> String { try await call("festivals-muhurta", "regional-festivals", json) }
+    /// ISKCON Festival List.
+    public func iskconFestivals(_ json: String) async throws -> String { try await call("festivals-muhurta", "iskcon-festivals", json) }
+    /// Dasha System (by name).
+    public func dashaSystem(_ json: String) async throws -> String { try await call("dashas", "dasha-system", json) }
+    /// Prasna Lagna (108 division).
+    public func prasnaLagna(_ json: String) async throws -> String { try await call("predictions", "prasna-lagna", json) }
+    /// Rama Shalaka Prashnavali.
+    public func ramaShalaka(_ json: String) async throws -> String { try await call("predictions", "rama-shalaka", json) }
+    /// Rama Shalaka Chart.
+    public func ramaShalakaChart(_ json: String) async throws -> String { try await call("predictions", "rama-shalaka-chart", json) }
+    /// Western Natal Chart with Options.
+    public func westernNatalOptions(_ json: String) async throws -> String { try await call("western", "western-natal-options", json) }
+    /// Sabian Degree Index.
+    public func sabianDegreeIndex(_ json: String) async throws -> String { try await call("western", "sabian-degree-index", json) }
+    /// Bhava Chart (house systems).
+    public func bhavaChart(_ json: String) async throws -> String { try await call("vedic-charts", "bhava-chart", json) }
+    /// Rashi Dictionary.
+    public func rashiDictionary(_ json: String) async throws -> String { try await call("utilities", "rashi-dictionary", json) }
+    /// Nakshatra Dictionary.
+    public func nakshatraDictionary(_ json: String) async throws -> String { try await call("utilities", "nakshatra-dictionary", json) }
+    /// Nitya Yoga Dictionary.
+    public func nityaYogaDictionary(_ json: String) async throws -> String { try await call("utilities", "nitya-yoga-dictionary", json) }
+    /// Karana Dictionary.
+    public func karanaDictionary(_ json: String) async throws -> String { try await call("utilities", "karana-dictionary", json) }
+    /// Tithi Dictionary.
+    public func tithiDictionary(_ json: String) async throws -> String { try await call("utilities", "tithi-dictionary", json) }
+    /// Planet Dictionary.
+    public func planetDictionary(_ json: String) async throws -> String { try await call("utilities", "planet-dictionary", json) }
+    /// Avastha Dictionary.
+    public func avasthaDictionary(_ json: String) async throws -> String { try await call("utilities", "avastha-dictionary", json) }
+    /// Today Feed.
+    public func todayFeed(_ json: String) async throws -> String { try await call("panchang", "today-feed", json) }
+    /// Latta (Planetary Kick).
+    public func latta(_ json: String) async throws -> String { try await call("panchang", "latta", json) }
+    /// Vaar Vela (Narada Purana).
+    public func vaarVela(_ json: String) async throws -> String { try await call("panchang", "vaar-vela", json) }
+    /// Stanapana Muhurta.
+    public func stanapana(_ json: String) async throws -> String { try await call("festivals-muhurta", "stanapana", json) }
+    /// Jeevanama and Netrama (Tamil).
+    public func jeevanamaNetrama(_ json: String) async throws -> String { try await call("panchang", "jeevanama-netrama", json) }
+    /// Nakshatra Shool.
+    public func nakshatraShool(_ json: String) async throws -> String { try await call("panchang", "nakshatra-shool", json) }
+    /// Solar Baana.
+    public func solarBaana(_ json: String) async throws -> String { try await call("panchang", "solar-baana", json) }
+    /// Venus Combustion (Direct 10, Retrograde 8).
+    public func venusCombustion(_ json: String) async throws -> String { try await call("panchang", "venus-combustion", json) }
+    /// Sankranti Vahana by Source Profile.
+    public func sankrantiVahanaProfile(_ json: String) async throws -> String { try await call("festivals-muhurta", "sankranti-vahana-profile", json) }
+    /// Tamil Yogam Discrepancy Dataset.
+    public func tamilYogamDiscrepancies(_ json: String) async throws -> String { try await call("panchang", "tamil-yogam-discrepancies", json) }
+    /// Vaar Vela, Kaal Vela and Kaal Ratri (DrikPanchang and Narada Purana profiles).
+    public func upagrahaVelas(_ json: String) async throws -> String { try await call("panchang", "upagraha-velas", json) }
+    /// Vidaal Yoga (Sun-Moon 28-nakshatra count).
+    public func vidaalYoga(_ json: String) async throws -> String { try await call("panchang", "vidaal-yoga", json) }
+    /// Amirthadi Yogam Table (default and Sringeri 2022-23).
+    public func amritadiYogamTable(_ json: String) async throws -> String { try await call("panchang", "amritadi-yogam-table", json) }
+    /// Bengali and Odia Equal Muhurtas.
+    public func regionalMuhurtas(_ json: String) async throws -> String { try await call("panchang", "regional-muhurtas", json) }
+    /// Custom Ayadi (user constants).
+    public func ayadiCustom(_ json: String) async throws -> String { try await call("vastu", "ayadi-custom", json) }
+    /// Pending Panchanga Items (unavailable).
+    public func pendingPanchangaItems(_ json: String) async throws -> String { try await call("panchang", "pending-panchanga-items", json) }
+    /// D5 Panchamsha and D11 Rudramsha Profiles.
+    public func d5D11Profiles(_ json: String) async throws -> String { try await call("vedic-charts", "d5-d11-profiles", json) }
+    /// D5 and D11 Division Edge Table.
+    public func d5D11Edges(_ json: String) async throws -> String { try await call("vedic-charts", "d5-d11-edges", json) }
+    /// Venus Heliacal Visibility (Swiss Ephemeris).
+    public func venusHeliacal(_ json: String) async throws -> String { try await call("panchang", "venus-heliacal", json) }
+    /// Venus Heliacal vs Published Asta and Udaya (Delhi 2026).
+    public func venusHeliacalComparison(_ json: String) async throws -> String { try await call("panchang", "venus-heliacal-comparison", json) }
+    /// Rashi Dasha Inventory.
+    public func rashiDashaInventory(_ json: String) async throws -> String { try await call("dashas", "rashi-dasha-inventory", json) }
+    /// Sthira Dasha (from a Brahma sign).
+    public func sthiraDashaBrahma(_ json: String) async throws -> String { try await call("dashas", "sthira-dasha-brahma", json) }
+    /// Narayana Dasha Antardashas (solar-arc).
+    public func narayanaAntardasha(_ json: String) async throws -> String { try await call("dashas", "narayana-antardasha", json) }
+    /// Brahma Selection (Jaimini Upadesa Sutras).
+    public func brahmaSelection(_ json: String) async throws -> String { try await call("dashas", "brahma-selection", json) }
+    /// Full Ayadi, Utpala and Samarangana (convention).
+    public func ayadiFull(_ json: String) async throws -> String { try await call("vastu", "ayadi-full", json) }
+    /// Brihaspati Samvatsara (DrikPanchang-calibrated).
+    public func brihaspatiSamvatsaraCalibrated(_ json: String) async throws -> String { try await call("panchang", "brihaspati-samvatsara-calibrated", json) }
+    /// Rashi Dasha Antardashas (equal twelfths).
+    public func rashiAntardasha(_ json: String) async throws -> String { try await call("dashas", "rashi-antardasha", json) }
 }
