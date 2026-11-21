@@ -84,7 +84,7 @@ public final class Astro96Client: @unchecked Sendable {
         } else {
             self.app = nil
         }
-        self.userAgent = "96astro-swift/0.3.0 plt/" + Astro96Client.platform
+        self.userAgent = "96astro-swift/0.3.1 plt/" + Astro96Client.platform
         let trimmed = baseURL.hasSuffix("/") ? String(baseURL.dropLast()) : baseURL
         // The key is sent on every call, so only https is accepted (plain http only for localhost).
         let parts = URLComponents(string: trimmed)
